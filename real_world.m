@@ -3,14 +3,14 @@
 % The current control system is a PID controller.
 %
 % Created by Kyle Naddeo, Mon Jan 3 11:19:49 EST 
-% Modified by YOUR NAME AND DATE
+% Modified by Seth Freni 2/1/2022
 
 %% Start fresh
 close all; clc; clear device;
 
 %% Connect to device
 % device = open serial communication in the proper COM port
-
+device = serialport("COM5",19200);
 %% Parameters
 target      = 0.5;   % Desired height of the ball [m]
 sample_rate = 0.25;  % Amount of time between controll actions [s]
