@@ -18,16 +18,18 @@ function [distance,pwm,target,deadpan] = read_data(device)
 %% Ask nicely for data
 % use the serialport() command options to write the correct letter to the
 % system (Hint: the letters are in the spec sheet)
+write(device,"S","string")
 
 %% Read data
 % use the serialport() command options to read the response
+data = read(device,20,"string")
 
 %% Translate
 % translate the response to 4 doubles using str2double() and
 % extractBetween() (Hint: the response is in the spec sheet)
-% distance   = 
-% manual_pwm = 
-% target     = 
-% deadpan    = 
+% distance   = str2double(data(2:4))
+% manual_pwm = str2double(data(6:9))
+% target     = str2double(data(11:14))
+% deadpan    = str2double(data(16:19))
 
 end
