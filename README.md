@@ -15,6 +15,12 @@ Each section of the Bellmans equation has a specfic value assocaited with each p
 
 Simpified Q Table-
 
-![image](https://user-images.githubusercontent.com/98828696/164008060-f12caffb-e527-4e6d-b924-ccf89d54109a.png)
+
+--- | Action 1 | Action 2| Action 3
+--- | --- | --- | ---
+**state1** | Q(s1,a1) | Q(s1,a2)|Q(s1,a3)
+**state2**| Q(s2,a1)| Q(s2,a2)|Q(s2,a3)
+**state3**| Q(s3,a1)| Q(s3,a2)|Q(s3,a3)
+
 
 This is a simplier Q table then the one used for the ball and pipe but helps understand the idea. From the table you can see that this matrix could get very large based off the number of actions the enviroment has and the number of states within the environment. From the picture again every state and action meet at one point if followed untill the column or row touch at a single point. At this point the is where the value of Q should be either found or updated. For this table the matrix is only 2 dimension however in more complex designs like the bal and pipe 3 dimensional matrixs are used. Making the Q table a little more complex. However the big take away from the table is that every state and action has a Q value which is achieved from bellmans equation and is a value that depends on the current state, reward, and the the next state. Lastly for the Q table it can either be used to update values of Q or to search for the best action based of the current state. 
