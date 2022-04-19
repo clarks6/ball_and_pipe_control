@@ -8,7 +8,8 @@ Q-Learning is a type of reinforcement learning. Reinforcement learning is a syst
 
 Q-Leaning equation/Bellmans Equation-
 
-<font size= "15"> NewQ(s,a)= Q(s,a)+ α([R(s,a)+γmaxQ'(s',a')-Q(s,a)] </font>
+<img src="https://latex.codecogs.com/svg.image?&space;NewQ(s,a)=&space;Q(s,a)&plus;&space;α([R(s,a)&plus;γmaxQ'(s',a')-Q(s,a)]">
+
 
 Each section of the Bellmans equation has a specfic value assocaited with each part. The Alpha is the Learning rate meaning how fast does the leanring occur. To slow will make the learning take to long and to fast of a learning rate may not allow the computer keep up. After the Alpha is the reward. For every state action pair or for every action of each state there is a corresponding reward that is assigned from the reward function set up by the designer. The next part of the equation is lamda which is the discount factor. This means how much do you want to account for the future. When using Q-learning you must be able to look at the next state and know the action that produces the greatest reward. This will then be placed into the Bellman equation. Then the current Q value is substracted inside of  () of the discount factor.  With this equation a new Q valuue is generated and can be placed into the Q table. The layout of the Q table can be seen below. 
 
