@@ -10,6 +10,7 @@ function [q_table] = generateTable(timestep)
             posTable(i,:,j) = [0.0435:0.0435:0.9144]';
             velTable(i,j,:) = [lowVel+stepVel:stepVel:highVel]; 
             for k = 1:21
+                %rewardTable(i,j,k) = round(10*rand());
                 rewardTable(i,j,k) = round(10*rand());
             end
         end

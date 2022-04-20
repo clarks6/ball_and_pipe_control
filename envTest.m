@@ -1,6 +1,6 @@
 %code to start the Enviroment
 clear;
-runs = 10000000;
+runs = 10000;
 reward_current = 0;
 target_Y = 0.5;
 y_values = zeros(1,runs);
@@ -20,8 +20,8 @@ v_step = (max_veloc/10.5);
 pwm_array = 2000:100:4000;
 y_value_array = 0.0435:0.0435:0.9144;
 velocity_array = -max_veloc:v_step:max_veloc;
-
-q_table = generateTable(timesample(2));
+load("checkpoint20.mat");
+%q_table = ;
 
 % x0= [4095 4095];
 g=9.8;        % Gravity
@@ -74,7 +74,7 @@ for i=1:runs
     
     veloc = (Y(2)-Y(1))/timesample(1);
 
-    x = find(pwm_array == (pwm(1)+2727.0447));
+    x = find(pwm_array == pwm(1));
     y = find(y_value_array == Y(2));
     z = find(velocity_array == veloc);
     
@@ -85,33 +85,18 @@ for i=1:runs
             best_index = k;
         end
     end
-
-    q_table(x,y,z,4) = reward_added + 0.8*bestQValue;
+    %[bestQValue, best_index] = max(q_table,[],'all','linear');
+    %q_table(x,y,z,4) = reward_added + 0.8*bestQValue;
     
-    explore_index = round(rand*20)+1;
     % select next PWM value
-    p = rand;
+    pwm = [pwm_array(best_index) pwm_array(best_index)];
 
-    if mod(i,1000000) == 0
-        explore = explore - 0.1;
-    end
-
-    if p < explore
-        pwm = [pwm_array(explore_index) pwm_array(explore_index)];
-    else
-        pwm = [pwm_array(best_index) pwm_array(best_index)];
-    end
     pwm = pwm - 2727.0447;
     % bound pwm values
     if pwm(1) < 1600-2727.0447
         pwm = [1600-2727.0447 1600-2727.0447];
     elseif pwm(1) > 4000-2727.0447
         pwm = [4000-2727.0447 4000-2727.0447];
-    end
-
-    if mod(i,500000) == 0
-        checkpoint = "checkpoint" + num2str(i/500000) + ".mat";
-        save(checkpoint, 'q_table')
     end
 
 end
