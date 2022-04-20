@@ -1,6 +1,6 @@
 %code to start the Enviroment
 clear;
-runs = 10000000;
+runs = 10000;
 reward_current = 0;
 target_Y = 0.5;
 y_values = zeros(1,runs);
@@ -19,7 +19,7 @@ max_veloc = 0.9144/timesample(2);
 v_step = (max_veloc/10.5);
 pwm_array = 2000:100:4000;
 y_value_array = 0.0435:0.0435:0.9144;
-velocity_array = -max_veloc:v_step:max_veloc;
+velocity_array = -max_veloc:0.35:max_veloc;
 
 q_table = generateTable(timesample(2));
 
@@ -72,18 +72,29 @@ for i=1:runs
     [reward_current, reward_added] = getReward(abs(new_error), abs(old_error), reward_current);
     rewards(i) = reward_current;
     
-    veloc = (Y(2)-Y(1))/timesample(1);
+    veloc = (Y(2)-Y(1))/timesample(2);
 
     x = find(pwm_array == (pwm(1)+2727.0447));
     y = find(y_value_array == Y(2));
     z = find(velocity_array == veloc);
-    
+    v_test = velocity_array - veloc;
+    y_test = y_value_array - Y(2);
     bestQValue = -100;
+    min_vel = 20;
+    min_y = 100;
     for k = 1:21
         if bestQValue < q_table(k,y,z,4)
             bestQValue = q_table(k,y,z,4);
             best_index = k;
         end
+        if v_test(k) < min_vel
+            min_vel = v_test(k);
+            z = k;
+        end
+         if y_test(k) < min_y
+             min_y = y_test(k);
+             y = k;
+         end
     end
 
     q_table(x,y,z,4) = reward_added + 0.8*bestQValue;

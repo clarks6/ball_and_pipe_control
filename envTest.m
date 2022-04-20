@@ -72,7 +72,7 @@ for i=1:runs
     [reward_current, reward_added] = getReward(abs(new_error), abs(old_error), reward_current);
     rewards(i) = reward_current;
     
-    veloc = (Y(2)-Y(1))/timesample(1);
+    veloc = (Y(2)-Y(1))/timesample(2);
 
     x = find(pwm_array == pwm(1));
     y = find(y_value_array == Y(2));

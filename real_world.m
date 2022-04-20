@@ -7,6 +7,12 @@
 
 %% Start fresh
 close all; clc; clear device;
+load("checkpoint20.mat")
+y_old = 0;
+y_value_array = 0.0435:0.0435:0.9144;
+max_veloc = 0.9144/0.25;
+v_step = (max_veloc/10.5);
+velocity_array = -max_veloc:0.35:max_veloc;
 
 %% Connect to device
 % device = open serial communication in the proper COM port
@@ -44,11 +50,40 @@ while true
     %% Control
     prev_action = action;
     %action = % Come up with a scheme no answer is right but do something
-    if y > target_y
-        pwm = pwm - 10;
-    elseif y < target_y
-        pwm = pwm + 20;
+%     if y > target_y
+%         pwm = pwm - 10;
+%     elseif y < target_y
+%         pwm = pwm + 10;
+%     end
+    bestQValue = -100;
+    veloc = (y-y_old)/0.25;
+    v_test = velocity_array - veloc;
+    y_test = y_value_array - y;
+    bestQValue = -100;
+    min_vel = 20;
+    min_y = 100;
+
+    for k = 1:21
+        if v_test(k) < min_vel
+            min_vel = v_test(k);
+            z = k;
+        end
+        if y_test(k) < min_y
+            min_y = y_test(k);
+            w = k;
+        end
     end
+
+    for k=1:21
+        if bestQValue < q_table(k,w,z,4)
+            bestQValue = q_table(k,w,z,4);
+            best_index = k;
+        end
+    end
+
+    
+    pwm = q_table(best_index,w,z,1)
+
     action = set_pwm(device,pwm);
     %set_pwm(device,pwm);
 %     disp(y);
@@ -56,5 +91,6 @@ while true
         
     % Wait for next sample
     pause(sample_rate)
+    y_old = y;
 end
 
