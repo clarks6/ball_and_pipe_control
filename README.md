@@ -74,4 +74,7 @@ write(device,action,"string");
 ```
 Device is the serial port being used and action is the pwm value that the Q=learning decides to use. The string is just used so that the device is getting a string value. 
 ### generate_table 
-The Generate table file is as the name suggests generating a table. 
+The Generate table file is as the name suggests generating a table.
+
+### Errors
+
