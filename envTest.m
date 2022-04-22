@@ -1,4 +1,6 @@
-%code to start the Enviroment
+% a script to test the model at low or zero exploration
+% it is a modified version of the environment script
+% Created by: Seth Freni
 clear;
 runs = 10000;
 reward_current = 0;
@@ -11,7 +13,7 @@ distanceOld=0;
 bestQValue = -100;
 veloc_old = 0;
 
-explore = 0;
+explore = 0.05;
 
 syms  s
 timesample=[0 0.25]; 
@@ -24,7 +26,7 @@ y_value_array = 0:0.0229:0.9144;
 velocity_array = -max_veloc:v_step:max_veloc;
 
 % call the function to create the initial q table
-load("checkpoint1000000.mat")
+load("checkpoint0.03.mat")
 
 %{
  transfer function
@@ -121,7 +123,8 @@ for i=1:runs
         end
     end
     
-    explore_index = round(rand*39)+1;
+    explore_index = round(rand*19)+1;
+    explore_index2 = round(rand*19)+21;
     p = rand;
     
     if p < explore/2 % pick a random PWM value to explore with

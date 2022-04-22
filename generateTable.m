@@ -1,3 +1,15 @@
+%{
+ A MATLAB function to generate the initial q table for the environment
+
+    Input:
+        timestep: time between actions, used for calculating maximum
+        possible velocity
+
+    Output:
+        q_table: the initial q table with all values preset as random or 0
+            (up to user)
+    Created by: Keith Soules
+%}
 function [q_table] = generateTable(timestep)
     highVel = 0.9144/timestep;
      lowVel = -highVel;

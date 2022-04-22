@@ -1,4 +1,5 @@
-%code to start the Enviroment
+% a script to train the model and update the q table
+% Created by: Seth Freni and Ronan Harkins 
 clear; clc;
 runs = 1000000;
 reward_current = 0;
@@ -38,7 +39,7 @@ m= 0.01;    % mass of the ball
 rho=1.225;    % Rho
 V=3.35e-5;    % Volume 
 Veq=2.4384;   %
-pwm=[4000-2727.0447 4000-2727.0447];
+pwm=[3500-2727.0447 3500-2727.0447];
 C2=((2*g)/(Veq))*((m-(rho*V))/m); % value of C2
 C3=6.3787e-4;                     % Value of C3
 
@@ -49,7 +50,7 @@ sys= ss(TF);
 
 explore = 0.9;
 previous_states = [];
-for tot=1:100
+for tot=1:1000
     for i=1:runs
         pwm_values(i) = pwm(1);
         %{
@@ -156,50 +157,58 @@ for tot=1:100
         else
             pwm = pwm;
         end
+
+        % check if stuck in max PWM
         if (Y(2) == Y(1)) && (Y(2) ~= target_Y)
             stuck = stuck + 1;
         else
             stuck = 0;
         end
-
+        
+        % if stuck for too long, end run
         if stuck > 1000
             break;
         end
     
     end
-    % visualize history
-    pwm_values = pwm_values+2727.0447;
-    % Y values over time
-    figure(a)
-    plot(time,y_values)
-    title("Y Values")
-    grid on
-    
-    % PWM values over time
-    figure(b)
-    plot(time,pwm_values)
-    title("PWM Values")
-    grid on
-    
-    % Total reward over time
-    figure(c)
-    plot(time,rewards)
-    title("Reward")
-    grid on
-    a = a+3;
-    b = b+3;
-    c = c+3;
-
+   
+    reward_current = 0;
     explore = explore - 0.05;
     if explore <0.05
         explore = 0.05;
     end
 
-    pwm = [4000 4000];
+    explore_index = round(rand*39)+1;
+    pwm = [pwm_array(explore_index)-2727.0447 pwm_array(explore_index)-2727.0447];
     previous_states = [];
-    % save a checkpoint every 1000000 runs
-         checkpoint = "checkpoint" + num2str(tot) + ".mat";
+    % save a checkpoint every 100 runs
+    if (mod(tot,100) == 0)
+         checkpoint = "checkpoint" + num2str(tot/100) + ".mat";
          save(checkpoint, 'q_table')
+
+        % visualize history
+        pwm_values = pwm_values+2727.0447;
+        % Y values over time
+        figure(a)
+        plot(time,y_values)
+        title("Y Values")
+        grid on
+        
+        % PWM values over time
+        figure(b)
+        plot(time,pwm_values)
+        title("PWM Values")
+        grid on
+        
+        % Total reward over time
+        figure(c)
+        plot(time,rewards)
+        title("Reward")
+        grid on
+        a = a+3;
+        b = b+3;
+        c = c+3;
+     end
 end
 
 

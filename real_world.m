@@ -3,7 +3,7 @@
 % The current control system is a PID controller.
 %
 % Created by Kyle Naddeo, Mon Jan 3 11:19:49 EST 
-% Modified by Seth Freni 2/1/2022
+% Modified by Seth Freni 4/22/2022
 
 %% Start fresh
 close all; clc; clear device;
@@ -34,6 +34,7 @@ error_sum   = 0;
 
 %% Feedback loop
 pwm = 4095;
+explore = 0.05; % percent to pick random PWM
 while true
     %% Read current height
     
@@ -50,39 +51,54 @@ while true
     %% Control
     prev_action = action;
     %action = % Come up with a scheme no answer is right but do something
-%     if y > target_y
-%         pwm = pwm - 10;
-%     elseif y < target_y
-%         pwm = pwm + 10;
-%     end
-    bestQValue = -100;
-    veloc = (y-y_old)/0.25;
+
     v_test = velocity_array - veloc;
-    y_test = y_value_array - y;
+    y_test = y_value_array - Y(2);
     bestQValue = -100;
     min_vel = 20;
     min_y = 100;
-
-    for k = 1:21
+    %{
+        iterate through array of values
+        PWM iteration finds best next value and the reward for switching to it
+        velocity and y value iterations find current location to set PWM    
+    %}
+    for k = 1:40
         if abs(v_test(k)) < min_vel
-            min_vel = v_test(k);
+            min_vel = abs(v_test(k));
             z = k;
         end
-        if abs(y_test(k)) < min_y
-            min_y = y_test(k);
-            w = k;
+         if abs(y_test(k)) < min_y
+             min_y = abs(y_test(k));
+             y = k;
+         end
+    end
+    for l = 1:40
+        if  q_table(l,y,z,4) > bestQValue
+            bestQValue = q_table(l,y,z,4);
+            best_index = k;
         end
     end
-
-    for p=1:21
-        if bestQValue < q_table(p,w,z,4)
-            bestQValue = q_table(p,w,z,4);
-            best_index = p;
-        end
-    end
-
     
-    pwm = q_table(best_index,w,z,1)
+    explore_index = round(rand*19)+1;
+    explore_index2 = round(rand*19)+21;
+    p = rand;
+    
+    if p < explore/2 % pick a random PWM value to explore with
+        pwm = pwm_array(explore_index);
+    elseif p > explore/2 && p < explore % pick a random PWM value to explore with
+        pwm = pwm_array(explore_index2);
+    else
+        pwm = pwm_array(best_index);
+    end
+
+    % bound pwm values
+    if pwm(1) < 1550
+        pwm = 1550;
+    elseif pwm(1) > 3500
+        pwm = 3500;
+    else
+        pwm = pwm;
+    end
 
     action = set_pwm(device,pwm);
     %set_pwm(device,pwm);
