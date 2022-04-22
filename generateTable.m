@@ -1,17 +1,17 @@
 function [q_table] = generateTable(timestep)
     highVel = 0.9144/timestep;
      lowVel = -highVel;
-     stepVel = (highVel - lowVel)/21;
+     stepVel = (highVel/19.9978);
     
     %%creating the qTable
-    for i = 1:21
-        for j = 1:21
-            actionTable(:,i,j) = [2000:100:4000]; 
-            posTable(i,:,j) = [0.0435:0.0435:0.9144]';
-            velTable(i,j,:) = [lowVel+stepVel:stepVel:highVel]; 
-            for k = 1:21
+    for i = 1:40
+        for j = 1:40
+            actionTable(:,i,j) = [1550:50:3500]; 
+            posTable(i,:,j) = [0:0.0229:0.9144]';
+            velTable(i,j,:) = [lowVel:stepVel:highVel]; 
+            for k = 1:40
                 %rewardTable(i,j,k) = round(10*rand());
-                rewardTable(i,j,k) = round(10*rand());
+                rewardTable(i,j,k) = 0;
             end
         end
     end

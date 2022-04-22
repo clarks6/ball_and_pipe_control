@@ -7,7 +7,7 @@
 
 %% Start fresh
 close all; clc; clear device;
-load("checkpoint20.mat")
+load("checkpoint5.mat")
 y_old = 0;
 y_value_array = 0.0435:0.0435:0.9144;
 max_veloc = 0.9144/0.25;
@@ -64,20 +64,20 @@ while true
     min_y = 100;
 
     for k = 1:21
-        if v_test(k) < min_vel
+        if abs(v_test(k)) < min_vel
             min_vel = v_test(k);
             z = k;
         end
-        if y_test(k) < min_y
+        if abs(y_test(k)) < min_y
             min_y = y_test(k);
             w = k;
         end
     end
 
-    for k=1:21
-        if bestQValue < q_table(k,w,z,4)
-            bestQValue = q_table(k,w,z,4);
-            best_index = k;
+    for p=1:21
+        if bestQValue < q_table(p,w,z,4)
+            bestQValue = q_table(p,w,z,4);
+            best_index = p;
         end
     end
 

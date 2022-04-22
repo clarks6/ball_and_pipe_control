@@ -9,21 +9,28 @@ rewards = zeros(1,runs);
 time = 1:runs;
 distanceOld=0;
 bestQValue = -100;
-best_index = 1;
+veloc_old = 0;
+
+explore = 0;
 
 syms  s
 timesample=[0 0.25]; 
 
 % vectors for finding q_table index
 max_veloc = 0.9144/timesample(2);
-v_step = (max_veloc/10.5);
-pwm_array = 2000:100:4000;
-y_value_array = 0.0435:0.0435:0.9144;
+v_step = (max_veloc/19.9978);
+pwm_array = 2050:50:4000;
+y_value_array = 0:0.0229:0.9144;
 velocity_array = -max_veloc:v_step:max_veloc;
-load("checkpoint20.mat");
-%q_table = ;
 
-% x0= [4095 4095];
+% call the function to create the initial q table
+load("checkpoint1000000.mat")
+
+%{
+ transfer function
+G(s)=(C3*C2)/(s*(s+C2))
+%}
+
 g=9.8;        % Gravity
 m= 2.7e-3;    % mass of the ball
 rho=1.225;    % Rho
@@ -38,11 +45,23 @@ D = sym2poly(s*(s+C2));
 TF = tf(N,D);
 sys= ss(TF);                        
 
-explore = 0.9;
 previous_states = [];
 for i=1:runs
     pwm_values(i) = pwm(1);
-    [Y, X, previous_states] = lsim(sys,pwm,timesample,previous_states);
+    %{
+        simulate ball and pipe
+        inputs: 
+            sys: transfer function G(s) modeling ball and pipe
+            pwm: real PWM value-2727.0447
+            timesample: time between each action: 0.25s
+            previous_states: the state the ball and pipe was in during the
+            previous run
+        outputs:
+            Y: [previous height, current height]
+            X: timestep
+            previous_states: the end state from the current run
+    %}
+    [Y, X, previous_states] = lsim(sys,pwm,timesample,previous_states); 
     previous_states = [previous_states(end-2), previous_states(end)];
     
     % bound Y values
@@ -54,6 +73,7 @@ for i=1:runs
             Y(j) = 0;
         end
     end
+
     % bound previous state values
      for j = 1:length(timesample)
         if previous_states(j) > 12.6356
@@ -65,52 +85,85 @@ for i=1:runs
     end
 
     y_values(i) = Y(2);
-
-    % calculate reward
-    new_error = target_Y-Y(2);
-    old_error = target_Y-Y(1);
-    [reward_current, reward_added] = getReward(abs(new_error), abs(old_error), reward_current);
-    rewards(i) = reward_current;
     
     veloc = (Y(2)-Y(1))/timesample(2);
-
-    x = find(pwm_array == pwm(1));
-    y = find(y_value_array == Y(2));
-    z = find(velocity_array == veloc);
     
+    % calculate current and added reward
+    [reward_current, reward_added] = getReward(target_Y, Y(2), Y(1), veloc_old, veloc, reward_current);
+    rewards(i) = reward_current;
+    
+    veloc_old = veloc;
+
+    v_test = velocity_array - veloc;
+    y_test = y_value_array - Y(2);
     bestQValue = -100;
-    for k = 1:21
-        if bestQValue < q_table(k,y,z,4)
-            bestQValue = q_table(k,y,z,4);
+    min_vel = 20;
+    min_y = 100;
+    %{
+        iterate through array of values
+        PWM iteration finds best next value and the reward for switching to it
+        velocity and y value iterations find current location to set PWM    
+    %}
+    for k = 1:40
+        if abs(v_test(k)) < min_vel
+            min_vel = abs(v_test(k));
+            z = k;
+        end
+         if abs(y_test(k)) < min_y
+             min_y = abs(y_test(k));
+             y = k;
+         end
+    end
+    for l = 1:40
+        if  q_table(l,y,z,4) > bestQValue
+            bestQValue = q_table(l,y,z,4);
             best_index = k;
         end
     end
-    %[bestQValue, best_index] = max(q_table,[],'all','linear');
-    %q_table(x,y,z,4) = reward_added + 0.8*bestQValue;
     
-    % select next PWM value
-    pwm = [pwm_array(best_index) pwm_array(best_index)];
-
-    pwm = pwm - 2727.0447;
-    % bound pwm values
-    if pwm(1) < 1600-2727.0447
-        pwm = [1600-2727.0447 1600-2727.0447];
-    elseif pwm(1) > 4000-2727.0447
-        pwm = [4000-2727.0447 4000-2727.0447];
+    explore_index = round(rand*39)+1;
+    p = rand;
+    
+    if p < explore/2 % pick a random PWM value to explore with
+        pwm = [pwm_array(explore_index)-2727.0447 pwm_array(explore_index)-2727.0447];
+    elseif p > explore/2 && p < explore % pick a random PWM value to explore with
+        pwm = [pwm_array(explore_index2)-2727.0447 pwm_array(explore_index2)-2727.0447];
+    else
+        pwm = [pwm_array(best_index)-2727.0447 pwm_array(best_index)-2727.0447];
     end
 
+    % bound pwm values
+    if pwm(1) < 1550-2727.0447
+        pwm = [1550-2727.0447 1550-2727.0447];
+    elseif pwm(1) > 3500-2727.0447
+        pwm = [3500-2727.0447 3500-2727.0447];
+    else
+        pwm = pwm;
+    end
+
+    % bound pwm values
+    if pwm(1) < 1550-2727.0447
+        pwm = [1550-2727.0447 1550-2727.0447];
+    elseif pwm(1) > 4000-2727.0447
+        pwm = [3500-2727.0447 3500-2727.0447];
+    end
 end
 
-% visualize results
+% visualize history
 pwm_values = pwm_values+2727.0447;
+% Y values over time
 figure(1)
 plot(time,y_values)
 title("Y Values")
 grid on
+
+% PWM values over time
 figure(2)
 plot(time,pwm_values)
 title("PWM Values")
 grid on
+
+% Total reward over time
 figure(3)
 plot(time,rewards)
 title("Reward")

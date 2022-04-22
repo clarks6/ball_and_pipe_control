@@ -1,6 +1,6 @@
 %code to start the Enviroment
-clear;
-runs = 10000;
+clear; clc;
+runs = 1000000;
 reward_current = 0;
 target_Y = 0.5;
 y_values = zeros(1,runs);
@@ -9,23 +9,32 @@ rewards = zeros(1,runs);
 time = 1:runs;
 distanceOld=0;
 bestQValue = -100;
-best_index = 1;
+veloc_old = 0;
+a = 1;
+b = 2;
+c = 3;
+stuck = 0;
 
 syms  s
 timesample=[0 0.25]; 
 
 % vectors for finding q_table index
 max_veloc = 0.9144/timesample(2);
-v_step = (max_veloc/10.5);
-pwm_array = 2000:100:4000;
-y_value_array = 0.0435:0.0435:0.9144;
-velocity_array = -max_veloc:0.35:max_veloc;
+v_step = (max_veloc/19.9978);
+pwm_array = 1550:50:3500;
+y_value_array = 0:0.0229:0.9144;
+velocity_array = -max_veloc:v_step:max_veloc;
 
+% call the function to create the initial q table
 q_table = generateTable(timesample(2));
 
-% x0= [4095 4095];
+%{
+ transfer function
+G(s)=(C3*C2)/(s*(s+C2))
+%}
+
 g=9.8;        % Gravity
-m= 2.7e-3;    % mass of the ball
+m= 0.01;    % mass of the ball
 rho=1.225;    % Rho
 V=3.35e-5;    % Volume 
 Veq=2.4384;   %
@@ -40,107 +49,160 @@ sys= ss(TF);
 
 explore = 0.9;
 previous_states = [];
-for i=1:runs
-    pwm_values(i) = pwm(1);
-    [Y, X, previous_states] = lsim(sys,pwm,timesample,previous_states);
-    previous_states = [previous_states(end-2), previous_states(end)];
+for tot=1:100
+    for i=1:runs
+        pwm_values(i) = pwm(1);
+        %{
+            simulate ball and pipe
+            inputs: 
+                sys: transfer function G(s) modeling ball and pipe
+                pwm: real PWM value-2727.0447
+                timesample: time between each action: 0.25s
+                previous_states: the state the ball and pipe was in during the
+                previous run
+            outputs:
+                Y: [previous height, current height]
+                X: timestep
+                previous_states: the end state from the current run
+        %}
+        [Y, X, previous_states] = lsim(sys,pwm,timesample,previous_states); 
+        previous_states = [previous_states(end-2), previous_states(end)];
+        
+        % bound Y values
+        for j = 1:length(timesample)
+            if Y(j) > 0.9144
+                Y(j) = 0.9144;
+            end
+            if Y(j) < 0
+                Y(j) = 0;
+            end
+        end
     
-    % bound Y values
-    for j = 1:length(timesample)
-        if Y(j) > 0.9144
-            Y(j) = 0.9144;
+        % bound previous state values
+         for j = 1:length(timesample)
+            if previous_states(j) > 12.6356
+                previous_states(j) = 12.6356;
+            end
+            if previous_states(j) < 0
+                previous_states(j) = 0;
+            end
         end
-        if Y(j) < 0
-            Y(j) = 0;
-        end
-    end
-    % bound previous state values
-     for j = 1:length(timesample)
-        if previous_states(j) > 12.6356
-            previous_states(j) = 12.6356;
-        end
-        if previous_states(j) < 0
-            previous_states(j) = 0;
-        end
-    end
-
-    y_values(i) = Y(2);
-
-    % calculate reward
-    new_error = target_Y-Y(2);
-    old_error = target_Y-Y(1);
-    [reward_current, reward_added] = getReward(abs(new_error), abs(old_error), reward_current);
-    rewards(i) = reward_current;
     
-    veloc = (Y(2)-Y(1))/timesample(2);
-
-    x = find(pwm_array == (pwm(1)+2727.0447));
-    y = find(y_value_array == Y(2));
-    z = find(velocity_array == veloc);
-    v_test = velocity_array - veloc;
-    y_test = y_value_array - Y(2);
-    bestQValue = -100;
-    min_vel = 20;
-    min_y = 100;
-    for k = 1:21
-        if bestQValue < q_table(k,y,z,4)
-            bestQValue = q_table(k,y,z,4);
-            best_index = k;
-        end
-        if v_test(k) < min_vel
-            min_vel = v_test(k);
-            z = k;
-        end
-         if y_test(k) < min_y
-             min_y = y_test(k);
-             y = k;
-         end
-    end
-
-    q_table(x,y,z,4) = reward_added + 0.8*bestQValue;
+        y_values(i) = Y(2);
+        
+        veloc = (Y(2)-Y(1))/timesample(2);
+        
+        % calculate current and added reward
+        [reward_current, reward_added] = getReward(target_Y, Y(2), Y(1), veloc_old, veloc, reward_current);
+        rewards(i) = reward_current;
+        
+        veloc_old = veloc;
     
-    explore_index = round(rand*20)+1;
-    % select next PWM value
-    p = rand;
+        %x = find(pwm_array == (pwm(1)+2727.0447));
+        v_test = velocity_array - veloc;
+        y_test = y_value_array - Y(2);
+        pwm_test = pwm_array - (pwm(1)+2727.0447);
+        min_pwm = 5000;
+        bestQValue = -100;
+        min_vel = 100;
+        min_y = 100;
+        %{
+            iterate through array of values
+            PWM iteration finds best next value and the reward for switching to it
+            velocity and y value iterations find current location to set PWM    
+        %}
+        for k = 1:40
+            if abs(v_test(k)) < min_vel
+                min_vel = v_test(k);
+                z = k;
+            end
+             if abs(y_test(k)) < min_y
+                 min_y = abs(y_test(k));
+                 y = k;
+             end
+             if abs(pwm_test(k)) < min_pwm
+                min_pwm = abs(pwm_test(k));
+                x = k;
+            end
+        end
+        for l = 1:40
+            if bestQValue < q_table(l,y,z,4)
+                bestQValue = q_table(l,y,z,4);
+                best_index = k;
+            end
+        end
+    
+        q_table(x,y,z,4) = reward_added + 0.8*bestQValue;
+        
+        % select next PWM value
+        explore_index = round(rand*19)+1;
+        explore_index2 = round(rand*19)+21;
+    
+        p = rand;
+            
+        if p < explore/2 % pick a random PWM value to explore with
+            pwm = [pwm_array(explore_index)-2727.0447 pwm_array(explore_index)-2727.0447];
+        elseif p > explore/2 && p < explore % pick a random PWM value to explore with
+            pwm = [pwm_array(explore_index2)-2727.0447 pwm_array(explore_index2)-2727.0447];
+        else
+            pwm = [pwm_array(best_index)-2727.0447 pwm_array(best_index)-2727.0447];
+        end
+    
+        % bound pwm values
+        if pwm(1) < 1550-2727.0447
+            pwm = [1550-2727.0447 1550-2727.0447];
+        elseif pwm(1) > 4000-2727.0447
+            pwm = [3500-2727.0447 3500-2727.0447];
+        else
+            pwm = pwm;
+        end
+        if (Y(2) == Y(1)) && (Y(2) ~= target_Y)
+            stuck = stuck + 1;
+        else
+            stuck = 0;
+        end
 
-    if mod(i,1000000) == 0
-        explore = explore - 0.1;
+        if stuck > 1000
+            break;
+        end
+    
+    end
+    % visualize history
+    pwm_values = pwm_values+2727.0447;
+    % Y values over time
+    figure(a)
+    plot(time,y_values)
+    title("Y Values")
+    grid on
+    
+    % PWM values over time
+    figure(b)
+    plot(time,pwm_values)
+    title("PWM Values")
+    grid on
+    
+    % Total reward over time
+    figure(c)
+    plot(time,rewards)
+    title("Reward")
+    grid on
+    a = a+3;
+    b = b+3;
+    c = c+3;
+
+    explore = explore - 0.05;
+    if explore <0.05
+        explore = 0.05;
     end
 
-    if p < explore
-        pwm = [pwm_array(explore_index) pwm_array(explore_index)];
-    else
-        pwm = [pwm_array(best_index) pwm_array(best_index)];
-    end
-    pwm = pwm - 2727.0447;
-    % bound pwm values
-    if pwm(1) < 1600-2727.0447
-        pwm = [1600-2727.0447 1600-2727.0447];
-    elseif pwm(1) > 4000-2727.0447
-        pwm = [4000-2727.0447 4000-2727.0447];
-    end
-
-    if mod(i,500000) == 0
-        checkpoint = "checkpoint" + num2str(i/500000) + ".mat";
-        save(checkpoint, 'q_table')
-    end
-
+    pwm = [4000 4000];
+    previous_states = [];
+    % save a checkpoint every 1000000 runs
+         checkpoint = "checkpoint" + num2str(tot) + ".mat";
+         save(checkpoint, 'q_table')
 end
 
-% visualize results
-pwm_values = pwm_values+2727.0447;
-figure(1)
-plot(time,y_values)
-title("Y Values")
-grid on
-figure(2)
-plot(time,pwm_values)
-title("PWM Values")
-grid on
-figure(3)
-plot(time,rewards)
-title("Reward")
-grid on
+
 
 % q table
 % 3 dimensions
