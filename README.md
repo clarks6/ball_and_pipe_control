@@ -1,7 +1,6 @@
 # Ball and Pipe Control System
 MATLAB codes to open serial communication with a ball and pipe system. The system is made of a vertical cylinder with a ping pong ball controlled by a fan on the bottom and height measured by a time of flight sensor on top. The objective is to balance the ball at a target altitude. 
 
-
 # Control Method- Q-learning
 Q-Learning is a type of reinforcement learning. Reinforcement learning is a system that learns to make desicions on its own based off of the information it has learned. Within Q-learning there is a reward value with every reward there is a state and action. For a simple Q-Learning the action could be to move up, down, left, and right.Taking this definition of action and state it can be seen that every unit of space in the enviroment, the physical place the learning is taking place, has an action that can occur. With this a Q Table can be constructed which will be taked about in more detail after the Bellmans equation.Q-leaning does not need a supervisor since it uses rewards as a way of telling right from wrong. Q-learning is a model free learning and does not use the normal reward method. In order to use this different reward method the Bellmans equation has to be used to find values of Q. 
 
@@ -55,7 +54,8 @@ The last thing within the evironment is whether or not to explore or exploit. Ou
   checkpoint = "checkpoint" + num2str(tot) + ".mat";
          save(checkpoint, 'q_table')
 ```
-
+### getReward
+The reward function is used to determine if an action was good or bad. Inside this file distanceOld and disatanceNew are used to determine if the action was correct. All this code does is see if the new distacne got closer to the target ditance than the old distance. If it did then the reward is plus 1. If the distance fif not get closer to the target distance reward is -10. Then this reward is fed back into the environment file and used to calculate Q. 
 ### real_world.m
 The real world file is the code that connects to the device as provides the information so the Q-Learning can function. First connection to the device is key making sure the right COM port is being used. This can be found under device mananger. Second is a standard number that is used for this specific controller. This can be done withing this code
 ```
@@ -103,6 +103,5 @@ write(device,action,"string");
 Device is the serial port being used and action is the pwm value that the Q=learning decides to use. The string is just used so that the device is getting a string value. 
 ### generate_table 
 The Generate table file is as the name suggests generating a table.
-
 ### Errors
 
