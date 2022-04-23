@@ -27,6 +27,34 @@ This is a simplier Q table then the one used for the ball and pipe but helps und
 # How to use code
 There are mutiple files that are required to run and simulate the code for the ball and pipe project. 
 ### env.m file
+The enviroment file has the bulk of all the code that is used for Q-learning. I order to simulate the the environment many inilizations need to be done witch can be seen at the begining of the file. When using the environment the first main part of the code is generating the Q table. In order to generate the Q-table the function is called from the generating Q table file. This table is randomized with random numbers so the Q-learning has some initial data to use and explore even if it is wrong it can be replaced. After the Q-table is made the system is initialized using transfer functions. Within this transfer function all constants such as gravity, mass of the ball, volume, and pwm are set. This part of the code is important in creating the environment. 
+```
+g=9.8;        % Gravity
+m= 0.01;    % mass of the ball
+rho=1.225;    % Rho
+V=3.35e-5;    % Volume 
+Veq=2.4384;   %
+pwm=[4000-2727.0447 4000-2727.0447];
+C2=((2*g)/(Veq))*((m-(rho*V))/m); % value of C2
+C3=6.3787e-4;                     % Value of C3
+
+N = C3*C2;
+D = sym2poly(s*(s+C2));
+TF = tf(N,D);
+```
+After the system is initilized the environment can be made. Inside a for loop of the amount of runs you want to do the environment is set up. Using the lsim function built into MATLAB. In order to do this the system,the input into the system,the time sample, and the previous state have to be given. The previous state is given from lsim. Also lsim outputs the heigh as seen below. 
+```
+[Y, X, previous_states] = lsim(sys,pwm,timesample,previous_states); 
+```
+To make sure values of Y are not being pushed passed the limits of the real system inside the pipe. The Y value of height is bounded to 0-0.9144 since that is the mac distance the ball can travel inside the pipe. Anouther imporant part of the environmenty is the reward function which can be seen in the get reward file. As the environmenmt is running new values of Q have been updated so when exploiting the value that best fits the siutation has to be used. So the table has to be searched for the specific state and determine what action it should take based of the Q table values. The Q-table is updated using the Bellmans equation. Using this equation inside the file each state and action should get a new Q-value after the simulation is run for a decent amount of runs. 
+```
+q_table(x,y,z,4) = reward_added + 0.8*bestQValue;
+```
+The last thing within the evironment is whether or not to explore or exploit. Our code chooses to ecplore 90% of the time and exploit 10% of the time. If exploring the pwm value can not just be random. From testing the actaul system of the ball and pipe the ball is not affected by a pwm of less than 1550. After this the ball can begins to move. So the randomization of pwm values is from the 1550 to the max value that can beused of 4950. At the end of the long for loop that just occured checkpoints are added for the when the code is run for long periods of time to make sure the data is saved and not lost if anything was to crash. These lines can be seen below and finshes off the environment file. 
+```
+  checkpoint = "checkpoint" + num2str(tot) + ".mat";
+         save(checkpoint, 'q_table')
+```
 
 ### real_world.m
 The real world file is the code that connects to the device as provides the information so the Q-Learning can function. First connection to the device is key making sure the right COM port is being used. This can be found under device mananger. Second is a standard number that is used for this specific controller. This can be done withing this code
