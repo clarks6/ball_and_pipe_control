@@ -10,26 +10,30 @@
             (up to user)
     Created by: Keith Soules
 %}
-function [q_table] = generateTable(timestep)
-    highVel = 0.9144/timestep;
-     lowVel = -highVel;
-     stepVel = (highVel/19.9978);
-    
-    %%creating the qTable
-    for i = 1:40
-        for j = 1:40
-            actionTable(:,i,j) = [1550:50:3500]; 
-            posTable(i,:,j) = [0:0.0229:0.9144]';
-            velTable(i,j,:) = [lowVel:stepVel:highVel]; 
-            for k = 1:40
-                %rewardTable(i,j,k) = round(10*rand());
-                rewardTable(i,j,k) = 0;
-            end
+function [qTable] = qAgent(timestep)
+
+%% Variables
+ tensorLen  = 50;                   % All sides of tensor must be equal to concatonate,
+                                    % and can be set here
+ highVel = 0.9144/timestep;         % Calculates velocity table max with a given timestep
+ lowVel = -highVel;                 % Set min velocity table value
+ stepVel = (highVel - lowVel)/50;   % Calulates velocity table step value
+
+%% Creating the qTable
+for i = 1:tensorLen
+    for j = 1:tensorLen
+        actionTable(:,i,j) = [1060:60:4000];                    % PMW action table
+        posTable(i,:,j) = [0:0.0183:0.9144]';                   % Tube Position table
+        velTable(i,j,:) = [lowVel+stepVel:stepVel:highVel];     % Velocity table
+        for k = 1:tensorLen
+            rewardTable(i,j,k) = round(10*rand());              % Randomized reward table
         end
     end
-    %%(action, postion, velocity, reward)
-    q_table = cat(4,actionTable,posTable,velTable,rewardTable);
-    % using Ex. max(qTable(:,2,3,4))
-    % we can find the max reward at 
-    % position 2, velocity 3
 end
+
+%% Concatonate all 4 tables
+qTable = cat(4,actionTable,posTable,velTable,rewardTable);
+% qTable(action, postion, velocity, reward)
+% Using Ex. max(qTable(:,2,3,4))
+% we can find the max reward at 
+% position 2, velocity 3
