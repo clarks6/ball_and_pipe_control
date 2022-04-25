@@ -105,7 +105,7 @@ for tot=1:1000
         y_test = y_value_array - Y(2);
         pwm_test = pwm_array - (pwm(1)+2727.0447);
         min_pwm = 5000;
-        bestQValue = -100;
+        bestQValue = -200;
         min_vel = 100;
         min_y = 100;
         %{

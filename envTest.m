@@ -21,9 +21,9 @@ timesample=[0 0.25];
 % vectors for finding q_table index
 max_veloc = 0.9144/timesample(2);
 v_step = (max_veloc/24.8816);
-pwm_array = 1530:36:3300;
+pwm_array = 1530:30:3000;
 y_value_array = 0:0.0183:0.9144;
-velocity_array = (-max_veloc+v_step):v_step:max_veloc;
+velocity_array = (-max_veloc):v_step:max_veloc;
 
 % call the function to create the initial q table
 load("checkpoint10.mat")
@@ -38,7 +38,7 @@ m= 0.1;    % mass of the ball
 rho=1.225;    % Rho
 V=3.35e-5;    % Volume 
 Veq=2.4384;   %
-pwm=[3300-2727.0447 3300-2727.0447];
+pwm=[3000-2727.0447 3000-2727.0447];
 C2=((2*g)/(Veq))*((m-(rho*V))/m); % value of C2
 C3=6.3787e-4;                     % Value of C3
 
@@ -98,7 +98,7 @@ for i=1:runs
 
     v_test = velocity_array - veloc;
     y_test = y_value_array - Y(2);
-    bestQValue = -100;
+    bestQValue = -200;
     min_vel = 20;
     min_y = 100;
     %{
