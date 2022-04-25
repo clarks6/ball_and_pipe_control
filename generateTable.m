@@ -1,35 +1,29 @@
-%{
- A MATLAB function to generate the initial q table for the environment
-
-    Input:
-        timestep: time between actions, used for calculating maximum
-        possible velocity
-
-    Output:
-        q_table: the initial q table with all values preset as random or 0
-            (up to user)
-    Created by: Keith Soules
-%}
 function [q_table] = generateTable(timestep)
-    highVel = 0.9144/timestep;
-     lowVel = -highVel;
-     stepVel = (highVel/19.9978);
-    
-    %%creating the qTable
-    for i = 1:40
-        for j = 1:40
-            actionTable(:,i,j) = [1550:50:3500]; 
-            posTable(i,:,j) = [0:0.0229:0.9144]';
-            velTable(i,j,:) = [lowVel:stepVel:highVel]; 
-            for k = 1:40
-                %rewardTable(i,j,k) = round(10*rand());
-                rewardTable(i,j,k) = 0;
-            end
+
+%% Variables
+ tensorLen  = 50;                   % All sides of tensor must be equal to concatonate,
+                                    % and can be set here
+ highVel = 0.9144/timestep;         % Calculates velocity table max with a given timestep
+ lowVel = -highVel;                 % Set min velocity table value
+ stepVel = (highVel/24.8816);   % Calulates velocity table step value
+
+%% Creating the qTable
+for i = 1:tensorLen
+    for j = 1:tensorLen
+        actionTable(:,i,j) = [1530:30:3000];                    % PMW action table
+        posTable(i,:,j) = [0:0.0183:0.9144]';                   % Tube Position table
+        velTable(i,j,:) = [lowVel+stepVel:stepVel:highVel];     % Velocity table
+        for k = 1:tensorLen
+           % rewardTable(i,j,k) = round(10*rand());              % Randomized reward table
+            rewardTable(i,j,k) = -101;              % Randomized reward table
+
         end
     end
-    %%(action, postion, velocity, reward)
-    q_table = cat(4,actionTable,posTable,velTable,rewardTable);
-    % using Ex. max(qTable(:,2,3,4))
-    % we can find the max reward at 
-    % position 2, velocity 3
 end
+
+%% Concatonate all 4 tables
+q_table = cat(4,actionTable,posTable,velTable,rewardTable);
+% qTable(action, postion, velocity, reward)
+% Using Ex. max(qTable(:,2,3,4))
+% we can find the max reward at 
+% position 2, velocity 3

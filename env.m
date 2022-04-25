@@ -1,7 +1,7 @@
 % a script to train the model and update the q table
 % Created by: Seth Freni and Ronan Harkins 
 clear; clc;
-runs = 1000000;
+runs = 10000;
 reward_current = 0;
 target_Y = 0.5;
 y_values = zeros(1,runs);
@@ -21,10 +21,10 @@ timesample=[0 0.25];
 
 % vectors for finding q_table index
 max_veloc = 0.9144/timesample(2);
-v_step = (max_veloc/19.9978);
-pwm_array = 1550:50:3500;
-y_value_array = 0:0.0229:0.9144;
-velocity_array = -max_veloc:v_step:max_veloc;
+v_step = (max_veloc/24.8816);
+pwm_array = 1530:30:3000;
+y_value_array = 0:0.0183:0.9144;
+velocity_array = (-max_veloc+v_step):v_step:max_veloc;
 
 % call the function to create the initial q table
 q_table = generateTable(timesample(2));
@@ -35,11 +35,11 @@ G(s)=(C3*C2)/(s*(s+C2))
 %}
 
 g=9.8;        % Gravity
-m= 0.01;    % mass of the ball
+m= 2.7e-3;    % mass of the ball
 rho=1.225;    % Rho
 V=3.35e-5;    % Volume 
 Veq=2.4384;   %
-pwm=[3500-2727.0447 3500-2727.0447];
+pwm=[3000-2727.0447 3000-2727.0447];
 C2=((2*g)/(Veq))*((m-(rho*V))/m); % value of C2
 C3=6.3787e-4;                     % Value of C3
 
@@ -51,6 +51,7 @@ sys= ss(TF);
 explore = 0.9;
 previous_states = [];
 for tot=1:1000
+    disp(tot)
     for i=1:runs
         pwm_values(i) = pwm(1);
         %{
@@ -136,8 +137,8 @@ for tot=1:1000
         q_table(x,y,z,4) = reward_added + 0.8*bestQValue;
         
         % select next PWM value
-        explore_index = round(rand*19)+1;
-        explore_index2 = round(rand*19)+21;
+        explore_index = round(rand*24)+1;
+        explore_index2 = round(rand*24)+26;
     
         p = rand;
             
@@ -150,24 +151,12 @@ for tot=1:1000
         end
     
         % bound pwm values
-        if pwm(1) < 1550-2727.0447
-            pwm = [1550-2727.0447 1550-2727.0447];
-        elseif pwm(1) > 4000-2727.0447
-            pwm = [3500-2727.0447 3500-2727.0447];
+        if pwm(1) < 1530-2727.0447
+            pwm = [1530-2727.0447 1530-2727.0447];
+        elseif pwm(1) > 3000-2727.0447
+            pwm = [3000-2727.0447 3300-2727.0447];
         else
             pwm = pwm;
-        end
-
-        % check if stuck in max PWM
-        if (Y(2) == Y(1)) && (Y(2) ~= target_Y)
-            stuck = stuck + 1;
-        else
-            stuck = 0;
-        end
-        
-        % if stuck for too long, end run
-        if stuck > 1000
-            break;
         end
     
     end

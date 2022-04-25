@@ -1,6 +1,6 @@
 %{
  A MATLAB function to generate reward for the model
-    If the ball is stuck at the top, lose 1000 points. 
+    If the ball is stuck at bounds, lose 100 points. 
     If the ball sits at the target, gain 1000 points.
     If error improves, gain points equal to 100-percent error.
     If error gets worse, lose 1 point.
@@ -20,26 +20,29 @@ function [reward_new, reward_added] = getReward(target_Y, distanceNew, distanceO
         
     if distanceNew-distanceOld == 0
         if distanceNew ~= target_Y
-            if distanceNew > 0.9
-                reward_added = -1000;
+            if (distanceNew > 0.9)
+                reward_added = -100;
+            elseif(distanceNew == 0)
+                reward_added = -100;
             else
                 reward_added = -1;
             end
-        else
+        elseif distanceNew == target_Y
             reward_added = 1000;
         end
-    elseif distanceNew > target_Y && (distanceNew-distanceOld ~= 0)
-        if veloc_new < veloc_old
-            reward_added = 100-100*(distanceOld-target_Y)/target_Y;
-        else
-            reward_added = -1;
-        end
-    elseif distanceNew < target_Y  && (distanceNew-distanceOld ~= 0)
-        if veloc_new > veloc_old
-            reward_added = 100-100*abs(distanceOld-target_Y)/target_Y;
-        else
-            reward_added = -1;
-        end
+%     elseif distanceNew > target_Y && (distanceNew-distanceOld ~= 0)
+%         if veloc_new < veloc_old
+%             reward_added = 100-100*abs((distanceNew-target_Y)/target_Y);
+%         else
+%             reward_added = -5;
+%         end
+%     elseif distanceNew < target_Y  && (distanceNew-distanceOld ~= 0)
+%         if veloc_new > veloc_old
+    else
+            reward_added = 100-100*abs((distanceNew-target_Y)/target_Y);
+%         else
+%             reward_added = -5;
+%         end
     end
     reward_new = reward + reward_added; % reward_new = total reward of runs
                                         % reward_added = reward used for q_table 

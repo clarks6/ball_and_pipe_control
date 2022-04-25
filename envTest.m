@@ -20,13 +20,13 @@ timesample=[0 0.25];
 
 % vectors for finding q_table index
 max_veloc = 0.9144/timesample(2);
-v_step = (max_veloc/19.9978);
-pwm_array = 2050:50:4000;
-y_value_array = 0:0.0229:0.9144;
-velocity_array = -max_veloc:v_step:max_veloc;
+v_step = (max_veloc/24.8816);
+pwm_array = 1530:36:3300;
+y_value_array = 0:0.0183:0.9144;
+velocity_array = (-max_veloc+v_step):v_step:max_veloc;
 
 % call the function to create the initial q table
-load("checkpoint0.03.mat")
+load("checkpoint10.mat")
 
 %{
  transfer function
@@ -34,11 +34,11 @@ G(s)=(C3*C2)/(s*(s+C2))
 %}
 
 g=9.8;        % Gravity
-m= 2.7e-3;    % mass of the ball
+m= 0.1;    % mass of the ball
 rho=1.225;    % Rho
 V=3.35e-5;    % Volume 
 Veq=2.4384;   %
-pwm=[4000-2727.0447 4000-2727.0447];
+pwm=[3300-2727.0447 3300-2727.0447];
 C2=((2*g)/(Veq))*((m-(rho*V))/m); % value of C2
 C3=6.3787e-4;                     % Value of C3
 
