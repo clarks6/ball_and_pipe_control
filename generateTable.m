@@ -10,7 +10,7 @@
             (up to user)
     Created by: Keith Soules
 %}
-function [qTable] = generateTable(timestep)
+function [q_table] = generateTable(timestep)
 
 %% Variables
  tensorLen  = 50;                   % All sides of tensor must be equal to concatonate,
