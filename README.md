@@ -107,7 +107,7 @@ generateTable(timestep)
 ```
 The function above can be called, with an input timestep. It will create the reward table, 
 action table, position table, and velocity table. Which is concatonized into a tensor consiting 
-of the four tables that can be manipulatied or queried using the following syntax.
+of the four variables that can be manipulatied or queried using the following syntax.
 ```
 qTable(action, postion, velocity, reward)
 ```
