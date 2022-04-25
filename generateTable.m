@@ -12,10 +12,9 @@ for i = 1:tensorLen
     for j = 1:tensorLen
         actionTable(:,i,j) = [1530:30:3000];                    % PMW action table
         posTable(i,:,j) = [0:0.0183:0.9144]';                   % Tube Position table
-        velTable(i,j,:) = lowVel:stepVel:highVel;       % Velocity table
-        for k = 1:tensorLen
-            %rewardTable(i,j,k) = round(10*rand());              % Randomized reward table
-            rewardTable(i,j,k) = -101;
+        velTable(i,j,:) = lowVel:stepVel:highVel;               % Velocity table
+        for k = 1:tensorLen 
+            rewardTable(i,j,k) = -101;                          % Reward table set to -101
         end
     end
 end
