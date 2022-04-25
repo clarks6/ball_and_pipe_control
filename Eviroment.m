@@ -1,3 +1,8 @@
+%%% A script created for the frist attemp at environment
+%did not function correctly with lsim
+%%%created by: Ronan Harkins 
+
+
 syms  s
 
 %%input environment
