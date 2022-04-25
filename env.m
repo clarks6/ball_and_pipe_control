@@ -24,7 +24,7 @@ max_veloc = 0.9144/timesample(2);
 v_step = (max_veloc/24.8816);
 pwm_array = 1530:30:3000;
 y_value_array = 0:0.0183:0.9144;
-velocity_array = (-max_veloc+v_step):v_step:max_veloc;
+velocity_array = (-max_veloc):v_step:max_veloc;
 
 % call the function to create the initial q table
 q_table = generateTable(timesample(2));

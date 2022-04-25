@@ -12,16 +12,10 @@ for i = 1:tensorLen
     for j = 1:tensorLen
         actionTable(:,i,j) = [1530:30:3000];                    % PMW action table
         posTable(i,:,j) = [0:0.0183:0.9144]';                   % Tube Position table
-        velTable(i,j,:) = [lowVel+stepVel:stepVel:highVel];     % Velocity table
+        velTable(i,j,:) = lowVel:stepVel:highVel;       % Velocity table
         for k = 1:tensorLen
-           % rewardTable(i,j,k) = round(10*rand());              % Randomized reward table
-            rewardTable(i,j,k) = -101;              % Randomized reward table
-
-        actionTable(:,i,j) = [1060:60:4000];                    % PMW action table
-        posTable(i,:,j) = [0:0.0183:0.9144]';                   % Tube Position table
-        velTable(i,j,:) = [lowVel+stepVel:stepVel:highVel];     % Velocity table
-        for k = 1:tensorLen
-            rewardTable(i,j,k) = round(10*rand());              % Randomized reward table
+            %rewardTable(i,j,k) = round(10*rand());              % Randomized reward table
+            rewardTable(i,j,k) = -101;
         end
     end
 end
@@ -32,4 +26,4 @@ q_table = cat(4,actionTable,posTable,velTable,rewardTable);
 % Using Ex. max(qTable(:,2,3,4))
 % we can find the max reward at 
 % position 2, velocity 3
-end 
+end     
