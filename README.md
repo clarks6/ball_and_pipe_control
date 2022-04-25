@@ -109,7 +109,7 @@ The function above can be called, with an input timestep. It will create the rew
 action table, position table, and velocity table. Which is concatonized into a tensor consiting 
 of the four variables that can be manipulatied or queried using the following syntax.
 ```
-qTable(action, postion, velocity, reward)
+q_table(action, postion, velocity, reward)
 ```
 ### Errors
 Within the files there are a few errors that came to groups attention when running the code. When the environment is run through a simulation it only pickes the best value in the entire Q table not just the specific state the ball is in. This can cause a many problems for the Q learning process because it is providing the false information to the controller. The team thinks the reason for this problem is an issue with the indexing of the Q table. The values being chosen are not bound to a state but the entire table. Anouther error that the team has could be the reward function. It is possible that the reward function is to strict for environment. These are just thoughts from the team that could be used to possibly fix the errors within the project.
