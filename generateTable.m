@@ -32,7 +32,7 @@ for i = 1:tensorLen
 end
 
 %% Concatonate all 4 tables
-qTable = cat(4,actionTable,posTable,velTable,rewardTable);
+q_table = cat(4,actionTable,posTable,velTable,rewardTable);
 % qTable(action, postion, velocity, reward)
 % Using Ex. max(qTable(:,2,3,4))
 % we can find the max reward at 
