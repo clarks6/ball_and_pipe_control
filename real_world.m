@@ -7,12 +7,13 @@
 
 %% Start fresh
 close all; clc; clear device;
-load("checkpoint5.mat")
+load("checkpoint10.mat")
 y_old = 0;
-y_value_array = 0.0435:0.0435:0.9144;
-max_veloc = 0.9144/0.25;
-v_step = (max_veloc/10.5);
-velocity_array = -max_veloc:0.35:max_veloc;
+pwm_array = 1530:40:3500;
+max_veloc = 0.9144/timesample(2);
+v_step = (max_veloc/24.8816);
+y_value_array = 0:0.0183:0.9144;
+velocity_array = (-max_veloc):v_step:max_veloc;
 
 %% Connect to device
 % device = open serial communication in the proper COM port
@@ -92,13 +93,14 @@ while true
     end
 
     % bound pwm values
-    if pwm(1) < 1550
-        pwm = 1550;
+    if pwm(1) < 1530
+        pwm = 1530;
     elseif pwm(1) > 3500
         pwm = 3500;
     else
         pwm = pwm;
     end
+    pwm = pwm+42;
 
     action = set_pwm(device,pwm);
     %set_pwm(device,pwm);

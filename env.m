@@ -22,7 +22,7 @@ timesample=[0 0.25];
 % vectors for finding q_table index
 max_veloc = 0.9144/timesample(2);
 v_step = (max_veloc/24.8816);
-pwm_array = 1530:30:3000;
+pwm_array = 1530:40:3500;
 y_value_array = 0:0.0183:0.9144;
 velocity_array = (-max_veloc):v_step:max_veloc;
 
@@ -39,7 +39,7 @@ m= 2.7e-3;    % mass of the ball
 rho=1.225;    % Rho
 V=3.35e-5;    % Volume 
 Veq=2.4384;   %
-pwm=[3000-2727.0447 3000-2727.0447];
+pwm=[3500-2727.0447 3500-2727.0447];
 C2=((2*g)/(Veq))*((m-(rho*V))/m); % value of C2
 C3=6.3787e-4;                     % Value of C3
 
@@ -137,14 +137,14 @@ for tot=1:1000
         q_table(x,y,z,4) = reward_added + 0.8*bestQValue;
         
         % select next PWM value
-        explore_index = round(rand*24)+1;
-        explore_index2 = round(rand*24)+26;
+        explore_index = round(rand*25)+1;
+        explore_index2 = round(rand*13)+27;
     
         p = rand;
             
         if p < explore/2 % pick a random PWM value to explore with
             pwm = [pwm_array(explore_index)-2727.0447 pwm_array(explore_index)-2727.0447];
-        elseif p > explore/2 && p < explore % pick a random PWM value to explore with
+        elseif (p > explore/2) && (p < explore) % pick a random PWM value to explore with
             pwm = [pwm_array(explore_index2)-2727.0447 pwm_array(explore_index2)-2727.0447];
         else
             pwm = [pwm_array(best_index)-2727.0447 pwm_array(best_index)-2727.0447];
@@ -153,8 +153,8 @@ for tot=1:1000
         % bound pwm values
         if pwm(1) < 1530-2727.0447
             pwm = [1530-2727.0447 1530-2727.0447];
-        elseif pwm(1) > 3000-2727.0447
-            pwm = [3000-2727.0447 3300-2727.0447];
+        elseif pwm(1) > 3500-2727.0447
+            pwm = [3500-2727.0447 3500-2727.0447];
         else
             pwm = pwm;
         end

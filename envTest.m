@@ -2,7 +2,7 @@
 % it is a modified version of the environment script
 % Created by: Seth Freni
 clear;
-runs = 10000;
+runs = 20000;
 reward_current = 0;
 target_Y = 0.5;
 y_values = zeros(1,runs);
@@ -21,7 +21,7 @@ timesample=[0 0.25];
 % vectors for finding q_table index
 max_veloc = 0.9144/timesample(2);
 v_step = (max_veloc/24.8816);
-pwm_array = 1530:30:3000;
+pwm_array = 1530:30:3500;
 y_value_array = 0:0.0183:0.9144;
 velocity_array = (-max_veloc):v_step:max_veloc;
 
@@ -38,7 +38,7 @@ m= 0.1;    % mass of the ball
 rho=1.225;    % Rho
 V=3.35e-5;    % Volume 
 Veq=2.4384;   %
-pwm=[3000-2727.0447 3000-2727.0447];
+pwm=[3500-2727.0447 3500-2727.0447];
 C2=((2*g)/(Veq))*((m-(rho*V))/m); % value of C2
 C3=6.3787e-4;                     % Value of C3
 
@@ -143,13 +143,7 @@ for i=1:runs
     else
         pwm = pwm;
     end
-
-    % bound pwm values
-    if pwm(1) < 1550-2727.0447
-        pwm = [1550-2727.0447 1550-2727.0447];
-    elseif pwm(1) > 4000-2727.0447
-        pwm = [3500-2727.0447 3500-2727.0447];
-    end
+    pwm = pwm+42;
 end
 
 % visualize history

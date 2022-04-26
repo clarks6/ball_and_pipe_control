@@ -30,19 +30,8 @@ function [reward_new, reward_added] = getReward(target_Y, distanceNew, distanceO
         elseif distanceNew == target_Y
             reward_added = 1000;
         end
-%     elseif distanceNew > target_Y && (distanceNew-distanceOld ~= 0)
-%         if veloc_new < veloc_old
-%             reward_added = 100-100*abs((distanceNew-target_Y)/target_Y);
-%         else
-%             reward_added = -5;
-%         end
-%     elseif distanceNew < target_Y  && (distanceNew-distanceOld ~= 0)
-%         if veloc_new > veloc_old
     else
             reward_added = 100-100*abs((distanceNew-target_Y)/target_Y);
-%         else
-%             reward_added = -5;
-%         end
     end
     reward_new = reward + reward_added; % reward_new = total reward of runs
                                         % reward_added = reward used for q_table 
